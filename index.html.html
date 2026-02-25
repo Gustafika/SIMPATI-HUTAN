@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SIMPATI HUTAN — Demo Offline (Detail & Ringkas)</title>
+  <style>
+    :root { --bg:#f4f6f9; --card:#fff; --text:#0f172a; --muted:#475569; --line:#e2e8f0; }
+    body { margin:0; font-family: Arial, Helvetica, sans-serif; background:var(--bg); color:var(--text); }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 26px 18px; }
+    .header { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px 18px; box-shadow: 0 6px 18px rgba(2,6,23,.06); }
+    .title { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .badge { font-size: 12px; color:#0b3b2e; background:#d1fae5; padding:4px 10px; border-radius:999px; border:1px solid #a7f3d0; }
+    .badge2 { font-size: 12px; color:#1e3a8a; background:#dbeafe; padding:4px 10px; border-radius:999px; border:1px solid #bfdbfe; }
+    h1 { margin: 0; font-size: 22px; }
+    .sub { margin: 8px 0 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+
+    .grid { display:grid; grid-template-columns: 1.05fr .95fr; gap: 14px; margin-top: 14px; }
+    @media (max-width: 920px){ .grid { grid-template-columns: 1fr; } }
+
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; box-shadow: 0 6px 18px rgba(2,6,23,.06); }
+    .step { border-left: 4px solid #cbd5e1; padding-left: 12px; margin-bottom: 14px; }
+    .step.active { border-left-color:#2563eb; }
+    .step.done { border-left-color:#16a34a; }
+    .step h3 { margin: 0 0 10px; font-size: 15px; }
+    label { display:block; font-size: 12px; color: var(--muted); margin: 6px 0; }
+    select, input {
+      width:100%; padding: 10px 10px; border-radius: 10px; border:1px solid var(--line);
+      outline:none; font-size: 14px; background:#fff;
+    }
+    .row { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 520px){ .row { grid-template-columns: 1fr; } }
+
+    .btns { display:flex; gap:10px; margin-top: 10px; flex-wrap:wrap; }
+    button {
+      padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+      background:#0f172a; color:#fff; cursor:pointer; font-size: 13px;
+    }
+    button.secondary { background:#fff; color:#0f172a; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+
+    .resultTitle { display:flex; justify-content:space-between; gap:10px; align-items:center; }
+    .pill { font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid; white-space:nowrap; }
+    .pill.green { background:#e8f5e9; border-color:#bbf7d0; color:#166534; }
+    .pill.blue  { background:#e3f2fd; border-color:#bfdbfe; color:#1e3a8a; }
+    .pill.orange{ background:#fff3e0; border-color:#fed7aa; color:#9a3412; }
+    .pill.gray  { background:#f1f5f9; border-color:#e2e8f0; color:#334155; }
+
+    .kartu { margin-top: 12px; padding: 14px; border-radius: 14px; border:1px solid var(--line); background:#fff; }
+    .kartu h2 { margin:0 0 6px; font-size: 18px; }
+    .kartu p { margin: 6px 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .sectionTitle { margin: 12px 0 6px; font-size: 13px; color:#0f172a; }
+    .list { margin: 8px 0 0; padding-left: 18px; color: var(--muted); font-size: 13px; }
+    .warn { margin-top: 12px; padding: 10px 12px; border-radius: 12px; border: 1px dashed #94a3b8; color:#334155; background:#f8fafc; font-size: 12px; }
+    .tiny { font-size: 12px; color: var(--muted); }
+    .divider { height:1px; background: var(--line); margin: 12px 0; }
+    .hint { background:#f8fafc; border:1px solid var(--line); padding:10px; border-radius:12px; font-size:12px; color:var(--muted); }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="title">
+        <span class="badge">Prototype Demo (Offline)</span>
+        <span class="badge2">Detail & Ringkas</span>
+        <h1>SIMPATI HUTAN</h1>
+      </div>
+      <p class="sub">
+        Demo sistem klik bertahap (decision tree) berbasis Permen LHK No. 7 Tahun 2021 Bab III & Bab IV.
+        <br/>Alur: <b>Kegiatan → Status Kawasan → Luasan → Tahap → Rekomendasi Mekanisme + Persyaratan Utama + Tata Cara</b>.
+      </p>
+    </div>
+
+    <div class="grid">
+      <!-- KIRI: Wizard -->
+      <div class="card">
+        <div id="s1" class="step active">
+          <h3>Langkah 1 — Pilih Kegiatan (detail sesuai regulasi)</h3>
+
+          <label for="kegiatan">Kegiatan</label>
+          <select id="kegiatan">
+            <option value="">— Pilih —</option>
+
+            <optgroup label="A. PPKH (Bab IV) — Pasal 367 (Keputusan Menteri) ">
+              <option value="ppkh|religi">Religi (tempat ibadah/pemakaman nonkomersial/wisata rohani)</option>
+              <option value="ppkh|pertambangan">Pertambangan (mineral/batubara/migas + sarpras seperti jalan/pipa/conveyor/smelter)</option>
+              <option value="ppkh|ketenagalistrikan">Ketenagalistrikan (pembangkit/transmisi/distribusi/gardu induk/EBT)</option>
+              <option value="ppkh|panas_bumi">Panas bumi</option>
+              <option value="ppkh|telekomunikasi">Telekomunikasi (jaringan/pemancar/relay/stasiun bumi)</option>
+              <option value="ppkh|jalan_tol_kereta">Jalan umum / jalan tol / jalur kereta api</option>
+              <option value="ppkh|transportasi_non_umum_angkutan_produksi">Sarana transportasi non-umum angkutan hasil produksi non tambang (jalan/kanal/pelabuhan, dll)</option>
+              <option value="ppkh|waduk_bendungan_irigasi_sanitasi">Waduk/bendungan/bendung/irigasi/saluran air minum/sanitasi/bangunan pengairan</option>
+              <option value="ppkh|fasilitas_umum_permukiman">Fasilitas umum termasuk permukiman, sarpras umum & sosial yang terbangun</option>
+              <option value="ppkh|industri_non_primer_hh">Industri selain industri primer hasil hutan</option>
+              <option value="ppkh|hankam">Pertahanan dan keamanan (latihan tempur/radar/menara pengintai/PLBN/jalan inspeksi)</option>
+              <option value="ppkh|keselamatan_umum">Prasarana penunjang keselamatan umum (lalin laut/udara/darat, karantina, meteo-klimatologi-geofisika)</option>
+              <option value="ppkh|evakuasi_bencana_sementara">Jalur evakuasi bencana/penampungan korban bencana & lahan usaha sementara</option>
+              <option value="ppkh|pertanian_ketahanan_pangan">Pertanian tertentu dalam rangka Ketahanan Pangan</option>
+              <option value="ppkh|pertanian_ketahanan_energi">Pertanian tertentu dalam rangka Ketahanan Energi</option>
+              <option value="ppkh|tpa_limbah_pemulihan">TPA sampah/fasilitas pengolahan limbah/kegiatan pemulihan lingkungan hidup</option>
+            </optgroup>
+
+            <optgroup label="B. Kerja Sama (Bab IV) — Pasal 384 ayat (2) (Surat Dirjen a.n. Menteri)">
+              <option value="kerjasama|religi">Sarana religi (tempat ibadah/pemakaman umum nonkomersil)</option>
+              <option value="kerjasama|wisata_budaya">Wisata budaya & sarana penunjangnya (nonkomersial)</option>
+              <option value="kerjasama|kabel_sepanjang_alur">Penanaman/pemasangan kabel sepanjang alur/jalan</option>
+              <option value="kerjasama|pltmh">PLTMH (≤ 1 MW)</option>
+              <option value="kerjasama|listrik_desa_telekom">Jalur listrik masuk desa ≤70 kV / telekom bawah tanah / telekom bertiang seperti listrik desa</option>
+              <option value="kerjasama|kanal_irigasi_tanggul">Kanal/saluran tersier/normalisasi/sodetan/irigasi/tanggul banjir/tanggul erosi-abrasi</option>
+              <option value="kerjasama|rest_area_keselamatan">Rest area & sarana keselamatan lalu lintas darat</option>
+              <option value="kerjasama|peningkatan_alur_jalan">Peningkatan alur/jalan (tanpa pelebaran & tanpa jalan baru)</option>
+              <option value="kerjasama|embung_cekdam_sabo">Embung/cek dam/sabo/instalasi saluran air minum/penampungan air</option>
+              <option value="kerjasama|papan_iklan_portal_tugu">Papan iklan/portal/gardu pandang/tugu (peringatan/patung/penanda/gapura)</option>
+              <option value="kerjasama|penanaman_reklamasi_rehab">Penanaman oleh pihak di luar kehutanan untuk reklamasi & rehabilitasi hutan</option>
+              <option value="kerjasama|latihan_tempur_sarpras">Daerah latihan tempur & sarana penunjangnya (kecuali mess/kantor/gudang/jalan akses)</option>
+              <option value="kerjasama|alat_ukur_klimatologi">Penempatan alat ukur klimatologi & geofisika (mis. ombrometer)</option>
+              <option value="kerjasama|bumi_perkemahan">Bumi perkemahan</option>
+              <option value="kerjasama|menara_telekom">Menara telekomunikasi</option>
+              <option value="kerjasama|lapangan_tembak">Lapangan tembak</option>
+              <option value="kerjasama|pascatambang_tailing_dam">Kegiatan pasca tambang (pemeliharaan tailing atau dam)</option>
+            </optgroup>
+
+            <optgroup label="C. Survei (Bab IV) — Persetujuan pelaksanaan survei (Surat Dirjen)">
+              <option value="survei|survei">Survei (khusus kegiatan survei)</option>
+            </optgroup>
+
+            <optgroup label="D. Bab III (Perubahan Peruntukan/Fungsi)">
+              <option value="pelepasan|pelepasan">Pelepasan Kawasan Hutan (perubahan peruntukan jadi bukan kawasan hutan)</option>
+              <option value="perubahan_fungsi|perubahan_fungsi">Perubahan Fungsi Kawasan Hutan</option>
+            </optgroup>
+          </select>
+
+          <div class="hint" style="margin-top:10px;">
+            <b>Tip demo seminar (3 skenario cepat):</b>
+            <ol class="list">
+              <li>PPKH → pilih “Pertambangan” → Status HP → Luas 20 Ha → Tahap konstruksi</li>
+              <li>Survei → pilih “Survei” → Status HL → Tahap survei</li>
+              <li>Pelepasan → pilih “Pelepasan” → Status HPK</li>
+            </ol>
+          </div>
+        </div>
+
+        <div id="s2" class="step">
+          <h3>Langkah 2 — Status Kawasan</h3>
+          <label for="status">Status kawasan di lokasi</label>
+          <select id="status" disabled>
+            <option value="">— Pilih —</option>
+            <option value="hl">Hutan Lindung (HL)</option>
+            <option value="hp">Hutan Produksi (HP)</option>
+            <option value="hpk">Hutan Produksi yang dapat Dikonversi (HPK)</option>
+            <option value="hk">Hutan Konservasi (HK)</option>
+          </select>
+          <div class="tiny">Catatan: Untuk Bab IV (PPKH/Kerja Sama/Survei) umumnya valid pada HL/HP.</div>
+        </div>
+
+        <div id="s3" class="step">
+          <h3>Langkah 3 — Luasan & atribut khusus</h3>
+          <div class="row">
+            <div>
+              <label for="luas">Luas yang diajukan (Ha)</label>
+              <input id="luas" type="number" min="0" step="0.01" placeholder="contoh: 20" disabled />
+              <div class="tiny">Digunakan untuk catatan & (khusus PPKH) cek pelimpahan kewenangan.</div>
+            </div>
+            <div>
+              <label for="fasilitas">Khusus PPKH: fasilitas umum nonkomersial?</label>
+              <select id="fasilitas" disabled>
+                <option value="tidak">Tidak</option>
+                <option value="ya">Ya</option>
+              </select>
+              <div class="tiny">Jika Ya dan ≤ 5 Ha → (kasus tertentu) kewenangan dapat dilimpahkan ke Gubernur.</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="s4" class="step">
+          <h3>Langkah 4 — Tahap Kegiatan</h3>
+          <label for="tahap">Tahap</label>
+          <select id="tahap" disabled>
+            <option value="">— Pilih —</option>
+            <option value="survei">Survei</option>
+            <option value="perencanaan">Perencanaan</option>
+            <option value="konstruksi">Konstruksi</option>
+            <option value="operasi">Operasi</option>
+          </select>
+        </div>
+
+        <div class="btns">
+          <button id="btnHasil" onclick="generate()" disabled>Lihat Rekomendasi</button>
+          <button class="secondary" onclick="resetAll()">Reset</button>
+        </div>
+
+        <div class="warn">
+          ⚠️ <b>Disclaimer:</b> Demo ini adalah alat bantu interpretasi regulasi (rekomendasi awal) dan tidak menggantikan kewenangan pejabat berwenang.
+        </div>
+      </div>
+
+      <!-- KANAN: Output -->
+      <div class="card">
+        <div class="resultTitle">
+          <h3 style="margin:0;">Hasil Rekomendasi</h3>
+          <span id="pill" class="pill gray">Belum ada hasil</span>
+        </div>
+        <div class="divider"></div>
+        <div id="output" class="tiny">
+          Isi langkah 1–4, lalu klik <b>Lihat Rekomendasi</b>.
+          <div class="divider"></div>
+          <div class="tiny">
+            <b>Catatan untuk penguji:</b> demo ini menunjukkan <i>proof of concept</i> bahwa ketentuan Bab III & Bab IV dapat diterjemahkan menjadi sistem klik bertahap,
+            lalu menghasilkan rekomendasi mekanisme berikut ringkasan persyaratan dan tata cara.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const el = (id) => document.getElementById(id);
+
+  const kegiatanEl = el("kegiatan");
+  const statusEl   = el("status");
+  const luasEl     = el("luas");
+  const fasilitasEl= el("fasilitas");
+  const tahapEl    = el("tahap");
+  const btnHasil   = el("btnHasil");
+  const pill       = el("pill");
+  const output     = el("output");
+
+  function setStepState(stepId, state){
+    const s = el(stepId);
+    s.classList.remove("active","done");
+    if(state === "active") s.classList.add("active");
+    if(state === "done") s.classList.add("done");
+  }
+
+  function parseKegiatan(v){
+    // format: "tipe|kode"
+    if(!v || v.indexOf("|") === -1) return { tipe:"", kode:"" };
+    const [tipe, kode] = v.split("|");
+    return { tipe, kode };
+  }
+
+  function enableFromKegiatan(){
+    const v = kegiatanEl.value;
+    const enabled = v !== "";
+    statusEl.disabled = !enabled;
+    luasEl.disabled   = !enabled;
+    tahapEl.disabled  = !enabled;
+
+    const {tipe} = parseKegiatan(v);
+    fasilitasEl.disabled = !(tipe === "ppkh"); // hanya PPKH
+
+    if(tipe === "survei") tahapEl.value = "survei";
+
+    setStepState("s1", enabled ? "done" : "active");
+    setStepState("s2", enabled ? "active" : "none");
+    btnHasil.disabled = true;
+  }
+
+  function enableFromStatus(){
+    const ok = statusEl.value !== "";
+    setStepState("s2", ok ? "done" : "active");
+    setStepState("s3", ok ? "active" : "none");
+    btnHasil.disabled = true;
+  }
+
+  function enableFromLuasTahap(){
+    const hasTahap = tahapEl.value !== "";
+    const ok = hasTahap; // untuk demo, cukup tahap terisi
+    setStepState("s3", ok ? "done" : "active");
+    setStepState("s4", ok ? "active" : "none");
+    btnHasil.disabled = !ok;
+  }
+
+  kegiatanEl.addEventListener("change", enableFromKegiatan);
+  statusEl.addEventListener("change", enableFromStatus);
+  luasEl.addEventListener("input", enableFromLuasTahap);
+  fasilitasEl.addEventListener("change", enableFromLuasTahap);
+  tahapEl.addEventListener("change", enableFromLuasTahap);
+
+  function setPill(kind, text){
+    pill.className = "pill " + kind;
+    pill.textContent = text || "—";
+  }
+
+  function card({title, pillKind, pillText, authority, basis, req, steps, notes, warning}){
+    const liReq = req.map(x => `<li>${x}</li>`).join("");
+    const liSteps = steps.map(x => `<li>${x}</li>`).join("");
+    const liNotes = notes.map(x => `<li>${x}</li>`).join("");
+    setPill(pillKind, pillText);
+    output.innerHTML = `
+      <div class="kartu">
+        <h2>${title}</h2>
+        <p><b>Otoritas:</b> ${authority}</p>
+        <p><b>Dasar (ringkas):</b> ${basis}</p>
+
+        <div class="sectionTitle">📄 Persyaratan Utama (ringkas)</div>
+        <ul class="list">${liReq}</ul>
+
+        <div class="sectionTitle">⚙ Mekanisme Tata Cara (ringkas)</div>
+        <ul class="list">${liSteps}</ul>
+
+        <div class="sectionTitle">📌 Catatan</div>
+        <ul class="list">${liNotes}</ul>
+
+        ${warning ? `<div class="warn">${warning}</div>` : ``}
+      </div>
+    `;
+  }
+
+  function generate(){
+    const {tipe, kode} = parseKegiatan(kegiatanEl.value);
+    const s = statusEl.value;
+    const luas = parseFloat(luasEl.value || "0");
+    const fasilitas = fasilitasEl.value === "ya";
+    const tahap = tahapEl.value || "—";
+
+    const isHLHP = (s === "hl" || s === "hp");
+    const isHPK  = (s === "hpk");
+
+    const statusText = (s==="hl"?"Hutan Lindung (HL)":s==="hp"?"Hutan Produksi (HP)":s==="hpk"?"HPK":s==="hk"?"Hutan Konservasi (HK)":"—");
+
+    // Common disclaimer string for validasi
+    const invalidBabIV = () => card({
+      title: "Perlu verifikasi (status kawasan tidak sesuai jalur Bab IV)",
+      pillKind: "gray",
+      pillText: "Perlu verifikasi",
+      authority: "—",
+      basis: "Bab IV (Penggunaan Kawasan Hutan) umumnya berlaku pada HL/HP.",
+      req: [
+        "Verifikasi status kawasan lokasi (idealnya berbasis peta/GIS).",
+        "Jika lokasi HPK dan tujuannya keluar kawasan → pertimbangkan jalur Pelepasan (Bab III).",
+        "Jika Hutan Konservasi → mekanisme berbeda (di luar cakupan demo ini)."
+      ],
+      steps: ["Koreksi input status kawasan.", "Lakukan konsultasi/verifikasi teknis bila perlu."],
+      notes: [`Input status kawasan saat ini: <b>${statusText}</b>.`, `Tahap: <b>${tahap}</b>.`],
+      warning: "Demo ini fokus pada penentuan jalur mekanisme (rekomendasi awal), bukan keputusan final."
+    });
+
+    if(tipe === "survei"){
+      if(!isHLHP) return invalidBabIV();
+      return card({
+        title: "Persetujuan Pelaksanaan Kegiatan Survei",
+        pillKind: "blue",
+        pillText: "Survei (Surat Dirjen)",
+        authority: "Direktur Jenderal a.n. Menteri",
+        basis: "Bab IV — Mekanisme persetujuan pelaksanaan kegiatan survei.",
+        req: [
+          "Surat permohonan.",
+          "Peta lokasi (± 1:50.000 atau lebih besar) + softcopy (shp) koordinat UTM WGS84.",
+          "Dokumen lingkungan (UKL-UPL/SPPL) sesuai ketentuan (kecuali survei untuk penyusunan dokumen lingkungan).",
+          "Pakta integritas bermeterai."
+        ],
+        steps: [
+          "Pemohon mengajukan permohonan beserta persyaratan.",
+          "Penilaian permohonan oleh Ditjen (dapat termasuk verifikasi).",
+          "Terbit surat persetujuan survei (atau penolakan).",
+          "Pelaksanaan survei dilaporkan ke Balai & Dinas Provinsi.",
+          "Penyampaian laporan hasil survei setelah kegiatan berakhir."
+        ],
+        notes: [
+          "Berlaku pada HL/HP.",
+          "Jangka waktu persetujuan survei maksimal 1 tahun (dapat diperpanjang).",
+          "Larangan: penebangan pohon, pembukaan lahan, mendirikan bangunan permanen."
+        ],
+        warning: `Status: <b>${statusText}</b> • Tahap: <b>${tahap}</b> • Luas (informasi): <b>${isNaN(luas)?0:luas}</b> Ha`
+      });
+    }
+
+    if(tipe === "kerjasama"){
+      if(!isHLHP) return invalidBabIV();
+      return card({
+        title: "Persetujuan Kerja Sama Penggunaan Kawasan Hutan",
+        pillKind: "blue",
+        pillText: "Kerja Sama (Surat Dirjen)",
+        authority: "Direktur Jenderal a.n. Menteri",
+        basis: "Bab IV — Penggunaan kawasan hutan melalui mekanisme persetujuan kerja sama.",
+        req: [
+          "Perizinan/perjanjian yang relevan (bila dipersyaratkan untuk jenis kegiatan).",
+          "Peta lokasi (± 1:50.000 atau lebih besar) + softcopy (shp) koordinat UTM WGS84.",
+          "Dokumen lingkungan (AMDAL/UKL-UPL/SPPL) + persetujuan lingkungan (jika AMDAL/UKL-UPL).",
+          "Penilaian/kajian teknis (mencakup data lokasi & aspek teknis/sosial ekonomi/ekologi + saran).",
+          "Pakta integritas bermeterai."
+        ],
+        steps: [
+          "Pemohon mengajukan permohonan (melalui Perhutani/KHDTK/Dinas Provinsi sesuai lokasi).",
+          "Penilaian oleh Perhutani/KHDTK/Dinas Provinsi → usulan ke Menteri.",
+          "Ditjen menerbitkan persetujuan kerja sama (atau penolakan).",
+          "Pemohon & pengelola menandatangani perjanjian kerja sama (memuat hak-kewajiban, lokasi, jangka waktu, dll).",
+          "Pelaksanaan kerja sama & pelaporan berkala."
+        ],
+        notes: [
+          "Berlaku pada HL/HP.",
+          "Jangka waktu kerja sama 5 tahun (dapat diperpanjang).",
+          "Jika persetujuan tidak ditindaklanjuti perjanjian kerja sama ≤ 2 tahun → dinyatakan tidak berlaku."
+        ],
+        warning: `Status: <b>${statusText}</b> • Tahap: <b>${tahap}</b> • Kegiatan (contoh): <b>${kode.replaceAll("_"," ")}</b>`
+      });
+    }
+
+    if(tipe === "ppkh"){
+      if(!isHLHP) return invalidBabIV();
+
+      // Demo pelimpahan sederhana
+      const delegated = fasilitas && luas > 0 && luas <= 5;
+
+      return card({
+        title: delegated ? "PPKH (Kewenangan Dilimpahkan — Kasus Tertentu)" : "Persetujuan Penggunaan Kawasan Hutan (PPKH)",
+        pillKind: "green",
+        pillText: "PPKH",
+        authority: delegated ? "Gubernur (pelimpahan kewenangan, kasus tertentu)" : "Menteri (Keputusan Menteri)",
+        basis: "Bab IV — Mekanisme PPKH (Pasal 367 untuk daftar kegiatan) + tata cara permohonan & penilaian.",
+        req: [
+          "Pernyataan komitmen.",
+          "Pakta integritas.",
+          "Profil badan usaha/badan hukum (termasuk identitas & dokumen pendirian).",
+          "Peta lokasi (UTM WGS84) + peta citra penginderaan jauh (ketentuan tertentu) + softcopy.",
+          "Rekomendasi/pertimbangan teknis (mis. dari Pemda/Perhutani sesuai lokasi) bila dipersyaratkan.",
+          "Dokumen lingkungan & persetujuan lingkungan (bila wajib AMDAL/UKL-UPL).",
+          "Perizinan/Perizinan Berusaha yang relevan (bila sudah ada)."
+        ],
+        steps: [
+          "Permohonan diajukan (jalur OSS untuk berusaha, atau aplikasi/loket untuk selain OSS).",
+          "Verifikasi kelengkapan berkas (diterima/ditolak administrasi).",
+          "Penilaian & penelaahan teknis (dapat melibatkan konfirmasi lintas unit/ verifikasi lapangan).",
+          "Penelaahan hukum & penyusunan konsep keputusan.",
+          "Terbit Keputusan PPKH + notifikasi/unggah salinan keputusan & peta lampiran pada sistem."
+        ],
+        notes: [
+          "Berlaku pada HL/HP.",
+          `Tahap: <b>${tahap}</b>.`,
+          `Kegiatan dipilih: <b>${kode.replaceAll("_"," ")}</b> (kategori PPKH).`,
+          delegated
+            ? "Karena fasilitas umum nonkomersial dan luas ≤ 5 Ha → pada kasus tertentu kewenangan dapat dilimpahkan."
+            : "Jika fasilitas umum nonkomersial ≤ 5 Ha, atau pertambangan rakyat (khusus), bisa ada pelimpahan kewenangan sesuai ketentuan."
+        ],
+        warning: `Status: <b>${statusText}</b> • Luas: <b>${isNaN(luas)?0:luas}</b> Ha • Fasilitas nonkomersial: <b>${fasilitas ? "Ya" : "Tidak"}</b>`
+      });
+    }
+
+    if(tipe === "pelepasan"){
+      // Demo ringkas Bab III
+      if(!isHPK){
+        return card({
+          title: "Pelepasan Kawasan Hutan (Perlu verifikasi status kawasan)",
+          pillKind: "gray",
+          pillText: "Perlu verifikasi",
+          authority: "—",
+          basis: "Bab III — Pelepasan adalah perubahan peruntukan menjadi bukan kawasan hutan (ringkas).",
+          req: [
+            "Pastikan lokasi berada pada HPK (umum untuk pelepasan parsial).",
+            "Peta usulan pelepasan + data lokasi, luas, batas.",
+            "Dokumen pendukung sesuai kebutuhan (rencana pemanfaatan/pembangunan).",
+            "Verifikasi kriteria teknis (bebas beban/ketentuan khusus, dsb)."
+          ],
+          steps: [
+            "Permohonan/usulan pelepasan diajukan.",
+            "Verifikasi administratif & kriteria lokasi (termasuk status HPK).",
+            "Penilaian teknis (dapat termasuk verifikasi lapangan).",
+            "Rekomendasi/telaahan teknis.",
+            "Penetapan pelepasan sesuai ketentuan."
+          ],
+          notes: [
+            `Input status kawasan saat ini: <b>${statusText}</b>.`,
+            "Pada implementasi penuh, modul Bab III akan memuat kriteria & dokumen lebih spesifik per kasus."
+          ],
+          warning: "Untuk demo seminar: tekankan bahwa ini penentuan jalur + prasyarat awal, bukan keputusan final."
+        });
+      }
+
+      return card({
+        title: "Pelepasan Kawasan Hutan",
+        pillKind: "orange",
+        pillText: "Bab III",
+        authority: "Sesuai ketentuan Bab III (penetapan/keputusan berwenang)",
+        basis: "Bab III — Perubahan Peruntukan (Pelepasan) (ringkas).",
+        req: [
+          "Peta usulan pelepasan (lokasi, luas, batas) + softcopy bila diperlukan.",
+          "Dokumen pendukung rencana pemanfaatan/pembangunan.",
+          "Verifikasi kriteria lokasi (mis. status HPK, dan ketentuan teknis lain).",
+          "Dokumen lingkungan bila dipersyaratkan."
+        ],
+        steps: [
+          "Permohonan/usulan pelepasan diajukan.",
+          "Verifikasi administratif & kesesuaian status kawasan (HPK).",
+          "Penilaian teknis (termasuk aspek ruang, fungsi, dan dampak).",
+          "Rekomendasi/telaahan teknis.",
+          "Penetapan pelepasan sesuai ketentuan."
+        ],
+        notes: [
+          "Umumnya dilakukan pada HPK untuk tujuan perubahan peruntukan.",
+          "Dalam produk versi penuh, Bab III akan diperinci menjadi sub-putusan (kriteria & dokumen per jenis kasus).",
+          `Tahap: <b>${tahap}</b>.`
+        ],
+        warning: `Status: <b>${statusText}</b> • Luas (informasi): <b>${isNaN(luas)?0:luas}</b> Ha`
+      });
+    }
+
+    if(tipe === "perubahan_fungsi"){
+      return card({
+        title: "Perubahan Fungsi Kawasan Hutan",
+        pillKind: "orange",
+        pillText: "Bab III",
+        authority: "Sesuai ketentuan Bab III (penetapan/keputusan berwenang)",
+        basis: "Bab III — Perubahan Fungsi Kawasan Hutan (ringkas).",
+        req: [
+          "Usulan/permohohan perubahan fungsi (pihak pengusul sesuai ketentuan).",
+          "Peta usulan perubahan fungsi + data lokasi, luas, batas.",
+          "Kajian/pertimbangan teknis & kesesuaian fungsi.",
+          "Dokumen pendukung sesuai kebutuhan (termasuk dokumen lingkungan bila dipersyaratkan)."
+        ],
+        steps: [
+          "Usulan/permohohan perubahan fungsi diajukan.",
+          "Verifikasi administratif.",
+          "Penilaian teknis (fungsi, status, dampak).",
+          "Rapat/konfirmasi teknis bila diperlukan.",
+          "Penetapan perubahan fungsi sesuai ketentuan."
+        ],
+        notes: [
+          "Dalam pengembangan lanjut, modul ini akan dipecah menjadi: perubahan antar fungsi pokok vs dalam fungsi pokok.",
+          `Status: <b>${statusText}</b> • Tahap: <b>${tahap}</b>.`
+        ],
+        warning: "Untuk demo seminar: cukup tekankan bahwa Bab III adalah jalur ketika tujuan mengubah fungsi/peruntukan, bukan sekadar penggunaan kawasan."
+      });
+    }
+
+    // fallback
+    setPill("gray", "Belum ada hasil");
+    output.textContent = "Belum ada hasil.";
+  }
+
+  function resetAll(){
+    kegiatanEl.value = "";
+    statusEl.value = "";
+    luasEl.value = "";
+    fasilitasEl.value = "tidak";
+    tahapEl.value = "";
+    statusEl.disabled = true;
+    luasEl.disabled = true;
+    fasilitasEl.disabled = true;
+    tahapEl.disabled = true;
+    btnHasil.disabled = true;
+    setStepState("s1","active");
+    setStepState("s2","none");
+    setStepState("s3","none");
+    setStepState("s4","none");
+    setPill("gray","Belum ada hasil");
+    output.innerHTML = `
+      <div class="tiny">
+        Isi langkah 1–4, lalu klik <b>Lihat Rekomendasi</b>.
+        <div class="divider"></div>
+        <b>Catatan:</b> Demo ini menampilkan ringkasan persyaratan & tata cara (detail lengkap tetap mengacu regulasi resmi dan verifikasi instansi).
+      </div>
+    `;
+  }
+
+  // Enable/disable button based on basic completion
+  function updateButtonState(){
+    btnHasil.disabled = !(kegiatanEl.value && statusEl.value && tahapEl.value);
+  }
+  kegiatanEl.addEventListener("change", updateButtonState);
+  statusEl.addEventListener("change", updateButtonState);
+  tahapEl.addEventListener("change", updateButtonState);
+
+  // Initial
+  resetAll();
+</script>
+</body>
+</html>
